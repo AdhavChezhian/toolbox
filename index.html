@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Toolbox</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --ink: #1a1a18;
+      --paper: #f5f3ee;
+      --muted: #9a9890;
+      --accent: #2d6a4f;
+      --accent-light: #e8f4ee;
+      --border: #dedad2;
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 300;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 2rem;
+    }
+
+    header { text-align: center; margin-bottom: 4rem; }
+
+    .site-name {
+      font-family: 'Instrument Serif', serif;
+      font-size: clamp(2.8rem, 6vw, 5rem);
+      line-height: 1;
+      letter-spacing: -0.02em;
+    }
+
+    .site-name em { font-style: italic; color: var(--accent); }
+
+    .tagline {
+      margin-top: 0.75rem;
+      font-size: 1rem;
+      color: var(--muted);
+      font-weight: 300;
+      letter-spacing: 0.01em;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      max-width: 860px;
+      width: 100%;
+    }
+
+    .card {
+      background: var(--paper);
+      padding: 2rem 2rem 1.75rem;
+      text-decoration: none;
+      color: inherit;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      transition: background 0.15s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card:hover { background: #fff; }
+    .card:hover .card-arrow { opacity: 1; transform: translate(0, 0); }
+
+    .card-emoji { font-size: 2rem; line-height: 1; margin-bottom: 0.25rem; display: block; }
+
+    .card-title {
+      font-family: 'Instrument Serif', serif;
+      font-size: 1.4rem;
+      line-height: 1.2;
+      color: var(--ink);
+    }
+
+    .card-desc { font-size: 0.875rem; color: var(--muted); line-height: 1.5; font-weight: 300; }
+
+    .card-tag {
+      display: inline-block;
+      margin-top: 0.5rem;
+      font-size: 0.7rem;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: var(--accent-light);
+      padding: 0.2rem 0.6rem;
+      border-radius: 999px;
+      width: fit-content;
+    }
+
+    .card-arrow {
+      position: absolute;
+      top: 1.5rem; right: 1.5rem;
+      font-size: 1.1rem;
+      opacity: 0;
+      transform: translate(-4px, 4px);
+      transition: all 0.15s ease;
+      color: var(--accent);
+    }
+
+    .card.coming-soon { opacity: 0.5; pointer-events: none; }
+
+    footer { margin-top: 3rem; font-size: 0.8rem; color: var(--muted); text-align: center; }
+    footer a { color: var(--muted); text-decoration: underline; text-underline-offset: 3px; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1 class="site-name">The <em>Toolbox</em></h1>
+    <p class="tagline">mini tools, actually useful</p>
+  </header>
+
+  <div class="grid">
+    <a class="card" href="morse.html">
+      <span class="card-emoji">📡</span>
+      <span class="card-title">Morse Code</span>
+      <p class="card-desc">Translate text to morse, hear it play, and train yourself to read it.</p>
+      <span class="card-tag">Interactive</span>
+      <span class="card-arrow">↗</span>
+    </a>
+
+    <div class="card coming-soon">
+      <span class="card-emoji">🌍</span>
+      <span class="card-title">Right Now</span>
+      <p class="card-desc">See what's happening every second across the world.</p>
+      <span class="card-tag">Coming soon</span>
+    </div>
+
+    <div class="card coming-soon">
+      <span class="card-emoji">🗓</span>
+      <span class="card-title">Life in Weeks</span>
+      <p class="card-desc">Your entire life, visualized as a grid of weeks.</p>
+      <span class="card-tag">Coming soon</span>
+    </div>
+  </div>
+
+  <footer>
+    <p>made for fun &nbsp;·&nbsp; <a href="https://github.com" target="_blank">github</a></p>
+  </footer>
+
+</body>
+</html>
