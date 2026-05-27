@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Text Transformer · The Toolbox</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Syne+Mono&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --bg:#0f0f0d;--surface:#1a1a17;--surface2:#232320;--border:#2e2e2a;
+      --text:#f0ede6;--muted:#6b6b64;--accent:#60a5fa;--accent-dim:rgba(96,165,250,0.12);
+    }
+    html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-weight:300;}
+    body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:48px 48px;opacity:.3;pointer-events:none;z-index:0;}
+    body{display:flex;flex-direction:column;align-items:center;padding:2.5rem 1.5rem 5rem;}
+    .wrap{position:relative;z-index:1;width:100%;max-width:740px;}
+
+    nav{display:flex;align-items:center;gap:.5rem;margin-bottom:3rem;}
+    nav a{font-family:'Syne Mono',monospace;font-size:.8rem;color:var(--muted);text-decoration:none;transition:color .1s;}
+    nav a:hover{color:var(--text);}
+    nav .sep{color:var(--border);}
+    nav .cur{font-family:'Syne Mono',monospace;font-size:.8rem;color:var(--accent);}
+
+    .hero{margin-bottom:2.5rem;}
+    .hero h1{font-family:'Syne',sans-serif;font-size:clamp(2rem,5vw,3rem);font-weight:800;letter-spacing:-.03em;line-height:1;}
+    .hero h1 span{color:var(--accent);}
+    .hero p{margin-top:.6rem;font-size:.95rem;color:var(--muted);}
+
+    .input-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1.5rem;margin-bottom:1.25rem;}
+    .label{font-family:'Syne Mono',monospace;font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:.6rem;}
+    textarea{width:100%;font-family:'DM Sans',sans-serif;font-size:1.1rem;font-weight:300;background:transparent;border:none;color:var(--text);resize:none;outline:none;line-height:1.65;min-height:100px;caret-color:var(--accent);}
+    textarea::placeholder{color:var(--border);}
+
+    .transforms{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:1px;background:var(--border);border:1px solid var(--border);border-radius:14px;overflow:hidden;}
+
+    .t-row{
+      background:var(--surface);padding:1.1rem 1.25rem;
+      display:flex;align-items:flex-start;gap:1rem;
+      transition:background .1s;
+    }
+    .t-row:hover{background:var(--surface2);}
+
+    .t-info{flex:1;min-width:0;}
+    .t-name{font-family:'Syne',sans-serif;font-size:.85rem;font-weight:700;color:var(--text);margin-bottom:.3rem;}
+    .t-out{
+      font-family:'Syne Mono',monospace;font-size:.8rem;color:var(--accent);
+      word-break:break-all;line-height:1.5;
+      white-space:pre-wrap;
+    }
+    .t-out.empty{color:var(--muted);font-family:'DM Sans',sans-serif;}
+
+    .copy-btn{
+      flex-shrink:0;background:none;border:1px solid var(--border);border-radius:7px;
+      padding:.35rem .6rem;cursor:pointer;color:var(--muted);font-size:.7rem;
+      font-family:'Syne Mono',monospace;letter-spacing:.04em;transition:all .1s;
+      margin-top:.1rem;
+    }
+    .copy-btn:hover{border-color:var(--accent);color:var(--accent);}
+    .copy-btn.copied{border-color:var(--accent);color:var(--accent);background:var(--accent-dim);}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <nav>
+    <a href="index.html">The Toolbox</a>
+    <span class="sep">/</span>
+    <span class="cur">text transformer</span>
+  </nav>
+
+  <div class="hero">
+    <h1>Text <span>Transformer</span></h1>
+    <p>Type something and watch it transform every which way.</p>
+  </div>
+
+  <div class="input-card">
+    <div class="label">Your text</div>
+    <textarea id="input" placeholder="Start typing…" rows="3" autofocus></textarea>
+  </div>
+
+  <div class="transforms" id="transforms"></div>
+</div>
+
+<script>
+  const NATO = {A:'Alpha',B:'Bravo',C:'Charlie',D:'Delta',E:'Echo',F:'Foxtrot',G:'Golf',H:'Hotel',I:'India',J:'Juliet',K:'Kilo',L:'Lima',M:'Mike',N:'November',O:'Oscar',P:'Papa',Q:'Quebec',R:'Romeo',S:'Sierra',T:'Tango',U:'Uniform',V:'Victor',W:'Whiskey',X:'X-ray',Y:'Yankee',Z:'Zulu'};
+  const MORSE_MAP = {A:'.-',B:'-...',C:'-.-.',D:'-..',E:'.',F:'..-.',G:'--.',H:'....',I:'..',J:'.---',K:'-.-',L:'.-..',M:'--',N:'-.',O:'---',P:'.--.',Q:'--.-',R:'.-.',S:'...',T:'-',U:'..-',V:'...-',W:'.--',X:'-..-',Y:'-.--',Z:'--..',0:'-----',1:'.----',2:'..---',3:'...--',4:'....-',5:'.....',6:'-....',7:'--...',8:'---..',9:'----.'};
+
+  const TRANSFORMS = [
+    { name:'UPPERCASE',         fn: t => t.toUpperCase() },
+    { name:'lowercase',         fn: t => t.toLowerCase() },
+    { name:'Reversed',          fn: t => t.split('').reverse().join('') },
+    { name:'Scrambled words',   fn: t => t.split(' ').map(w=>{const a=w.split('');for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a.join('');}).join(' ')},
+    { name:'Pig Latin',         fn: t => t.split(' ').map(w=>{const m=w.match(/^([^aeiouAEIOU]*)(.+)$/);return m?(m[2]+m[1]+'ay'):w;}).join(' ')},
+    { name:'NATO Alphabet',     fn: t => t.toUpperCase().split('').map(c=>NATO[c]||(c===' '?'/':c)).join(' ')},
+    { name:'Morse Code',        fn: t => t.toUpperCase().split('').map(c=>c===' '?'/':MORSE_MAP[c]||'?').join(' ')},
+    { name:'Binary',            fn: t => t.split('').map(c=>c.charCodeAt(0).toString(2).padStart(8,'0')).join(' ')},
+    { name:'Leet speak',        fn: t => t.replace(/a/gi,'4').replace(/e/gi,'3').replace(/i/gi,'1').replace(/o/gi,'0').replace(/s/gi,'5').replace(/t/gi,'7')},
+    { name:'Alternating CaSe',  fn: t => t.split('').map((c,i)=>i%2===0?c.toUpperCase():c.toLowerCase()).join('')},
+    { name:'Upside-down flip',  fn: t => t.split('').map(c=>({a:'ɐ',b:'q',c:'ɔ',d:'p',e:'ǝ',f:'ɟ',g:'ƃ',h:'ɥ',i:'ᴉ',j:'ɾ',k:'ʞ',l:'l',m:'ɯ',n:'u',o:'o',p:'d',q:'b',r:'ɹ',s:'s',t:'ʇ',u:'n',v:'ʌ',w:'ʍ',x:'x',y:'ʎ',z:'z',A:'∀',B:'ᗺ',C:'Ɔ',D:'ᗡ',E:'Ǝ',F:'Ⅎ',G:'פ',H:'H',I:'I',J:'ɾ',K:'ʞ',L:'˥',M:'W',N:'N',O:'O',P:'Ԁ',Q:'Q',R:'ᴚ',S:'S',T:'┴',U:'∩',V:'Λ',W:'M',X:'X',Y:'⅄',Z:'Z',0:'0',1:'Ɩ',2:'ᄅ',3:'Ɛ',4:'ᔭ',5:'ϛ',6:'9',7:'L',8:'8',9:'6',' ':' '})[c]||c).reverse().join('')},
+    { name:'ROT13',             fn: t => t.replace(/[a-zA-Z]/g,c=>{const b=c<='Z'?65:97;return String.fromCharCode(((c.charCodeAt(0)-b+13)%26)+b);})},
+    { name:'Character count',   fn: t => `${t.length} chars · ${t.split(' ').filter(Boolean).length} words · ${t.split(/\n/).length} lines`},
+  ];
+
+  const input = document.getElementById('input');
+  const container = document.getElementById('transforms');
+
+  // Build rows
+  const rows = TRANSFORMS.map(tr => {
+    const row = document.createElement('div');
+    row.className = 't-row';
+    row.innerHTML = `
+      <div class="t-info">
+        <div class="t-name">${tr.name}</div>
+        <div class="t-out empty" data-key="${tr.name}">—</div>
+      </div>
+      <button class="copy-btn" data-copy="${tr.name}">copy</button>
+    `;
+    container.appendChild(row);
+    return row;
+  });
+
+  let currentOutputs = {};
+
+  function update() {
+    const val = input.value;
+    TRANSFORMS.forEach(tr => {
+      const out = val ? tr.fn(val) : null;
+      currentOutputs[tr.name] = out || '';
+      const el = container.querySelector(`[data-key="${tr.name}"]`);
+      if (out) { el.textContent = out; el.className = 't-out'; }
+      else { el.textContent = '—'; el.className = 't-out empty'; }
+    });
+  }
+
+  input.addEventListener('input', update);
+
+  container.addEventListener('click', e => {
+    const btn = e.target.closest('.copy-btn');
+    if (!btn) return;
+    const key = btn.dataset.copy;
+    const text = currentOutputs[key];
+    if (!text) return;
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = '✓';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'copy'; btn.classList.remove('copied'); }, 1400);
+    });
+  });
+</script>
+</body>
+</html>

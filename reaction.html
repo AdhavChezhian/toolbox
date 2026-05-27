@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reaction Time · The Toolbox</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Syne+Mono&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --bg:#0f0f0d;--surface:#1a1a17;--surface2:#232320;--border:#2e2e2a;
+      --text:#f0ede6;--muted:#6b6b64;--accent:#f87171;--accent-dim:rgba(248,113,113,.12);
+      --go:#4ade80;--wait:#e8c547;
+    }
+    html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-weight:300;}
+    body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:48px 48px;opacity:.3;pointer-events:none;z-index:0;}
+    body{display:flex;flex-direction:column;align-items:center;padding:2.5rem 1.5rem 5rem;}
+    .wrap{position:relative;z-index:1;width:100%;max-width:640px;}
+
+    nav{display:flex;align-items:center;gap:.5rem;margin-bottom:3rem;}
+    nav a{font-family:'Syne Mono',monospace;font-size:.8rem;color:var(--muted);text-decoration:none;transition:color .1s;}
+    nav a:hover{color:var(--text);}
+    nav .sep{color:var(--border);}
+    nav .cur{font-family:'Syne Mono',monospace;font-size:.8rem;color:var(--accent);}
+
+    .hero{margin-bottom:2.5rem;}
+    .hero h1{font-family:'Syne',sans-serif;font-size:clamp(2rem,5vw,3rem);font-weight:800;letter-spacing:-.03em;line-height:1;}
+    .hero h1 span{color:var(--accent);}
+    .hero p{margin-top:.6rem;font-size:.95rem;color:var(--muted);}
+
+    /* Big tap target */
+    #arena{
+      width:100%;height:280px;border-radius:20px;
+      display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.75rem;
+      cursor:pointer;user-select:none;transition:background .15s,box-shadow .15s;
+      border:1px solid var(--border);
+      background:var(--surface);
+      margin-bottom:1.5rem;
+      position:relative;overflow:hidden;
+    }
+    #arena:active{transform:scale(0.99);}
+
+    #arena.wait{background:#2a2500;border-color:var(--wait);}
+    #arena.go{background:#0a2a12;border-color:var(--go);box-shadow:0 0 40px rgba(74,222,128,.18);}
+    #arena.early{background:#2a0a0a;border-color:var(--accent);}
+    #arena.result{background:var(--surface2);border-color:var(--border);}
+
+    .arena-label{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:700;letter-spacing:.02em;color:var(--muted);text-transform:uppercase;letter-spacing:.12em;}
+    #arena.wait .arena-label{color:var(--wait);}
+    #arena.go .arena-label{color:var(--go);}
+    #arena.early .arena-label{color:var(--accent);}
+
+    .big-num{font-family:'Syne',sans-serif;font-size:5rem;font-weight:800;line-height:1;letter-spacing:-.04em;color:var(--go);}
+    .big-unit{font-family:'Syne Mono',monospace;font-size:.85rem;color:var(--muted);letter-spacing:.08em;}
+
+    /* History */
+    .history-wrap{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;}
+    .history-header{display:flex;justify-content:space-between;align-items:center;padding:1rem 1.25rem;border-bottom:1px solid var(--border);}
+    .label{font-family:'Syne Mono',monospace;font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);}
+    .stats-row{display:flex;gap:1.5rem;}
+    .stat{display:flex;flex-direction:column;gap:.1rem;}
+    .stat-val{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:700;color:var(--text);}
+    .stat-key{font-family:'Syne Mono',monospace;font-size:.6rem;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;}
+
+    .history-list{display:flex;flex-direction:column;}
+    .history-item{display:flex;align-items:center;gap:1rem;padding:.75rem 1.25rem;border-bottom:1px solid var(--border);}
+    .history-item:last-child{border-bottom:none;}
+    .h-num{font-family:'Syne Mono',monospace;font-size:.7rem;color:var(--muted);width:20px;flex-shrink:0;}
+    .h-bar-wrap{flex:1;height:6px;background:var(--surface2);border-radius:99px;overflow:hidden;}
+    .h-bar{height:100%;border-radius:99px;background:var(--go);transition:width .3s ease;}
+    .h-ms{font-family:'Syne Mono',monospace;font-size:.8rem;color:var(--text);width:60px;text-align:right;flex-shrink:0;}
+    .h-badge{font-family:'Syne Mono',monospace;font-size:.6rem;padding:.15rem .4rem;border-radius:4px;flex-shrink:0;}
+    .h-badge.best{background:rgba(232,197,71,.15);color:var(--wait);}
+    .h-badge.ok{background:rgba(74,222,128,.1);color:var(--go);}
+    .h-badge.slow{background:rgba(248,113,113,.1);color:var(--accent);}
+
+    .empty-history{padding:2rem;text-align:center;font-size:.875rem;color:var(--muted);}
+
+    .btn-clear{background:none;border:1px solid var(--border);border-radius:7px;padding:.3rem .75rem;font-family:'Syne Mono',monospace;font-size:.65rem;color:var(--muted);cursor:pointer;transition:all .1s;letter-spacing:.04em;}
+    .btn-clear:hover{border-color:var(--accent);color:var(--accent);}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <nav>
+    <a href="index.html">The Toolbox</a>
+    <span class="sep">/</span>
+    <span class="cur">reaction time</span>
+  </nav>
+  <div class="hero">
+    <h1>Reaction <span>Time</span></h1>
+    <p>Click the moment you see green. How fast are you?</p>
+  </div>
+
+  <div id="arena" class="idle" onclick="handleClick()">
+    <div class="arena-label" id="arena-label">Click to begin</div>
+    <div id="arena-result" style="display:none;flex-direction:column;align-items:center;gap:.25rem;">
+      <div class="big-num" id="big-num"></div>
+      <div class="big-unit">milliseconds</div>
+    </div>
+  </div>
+
+  <div class="history-wrap">
+    <div class="history-header">
+      <span class="label">History</span>
+      <div class="stats-row">
+        <div class="stat"><span class="stat-val" id="stat-avg">—</span><span class="stat-key">Average</span></div>
+        <div class="stat"><span class="stat-val" id="stat-best">—</span><span class="stat-key">Best</span></div>
+        <div class="stat"><span class="stat-val" id="stat-count">0</span><span class="stat-key">Attempts</span></div>
+      </div>
+      <button class="btn-clear" onclick="clearHistory()">clear</button>
+    </div>
+    <div class="history-list" id="history-list">
+      <div class="empty-history">No attempts yet — go!</div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // States: idle → wait → go → result / early
+  let state = 'idle';
+  let waitTimer = null;
+  let startTime = null;
+  let history = [];
+
+  const arena = document.getElementById('arena');
+  const arenaLabel = document.getElementById('arena-label');
+  const arenaResult = document.getElementById('arena-result');
+  const bigNum = document.getElementById('big-num');
+
+  function setArena(st, label, showResult, num) {
+    state = st;
+    arena.className = st;
+    arenaLabel.textContent = label;
+    arenaLabel.style.display = showResult ? 'none' : '';
+    arenaResult.style.display = showResult ? 'flex' : 'none';
+    if (num !== undefined) bigNum.textContent = num;
+  }
+
+  function handleClick() {
+    if (state === 'idle' || state === 'result' || state === 'early') {
+      // Start waiting
+      setArena('wait', 'Wait for green…', false);
+      const delay = 1500 + Math.random() * 2500;
+      waitTimer = setTimeout(() => {
+        setArena('go', '', false);
+        startTime = performance.now();
+      }, delay);
+    } else if (state === 'wait') {
+      // Too early!
+      clearTimeout(waitTimer);
+      setArena('early', '⚡ Too early! Click to retry', false);
+    } else if (state === 'go') {
+      const ms = Math.round(performance.now() - startTime);
+      recordResult(ms);
+      setArena('result', '', true, ms);
+    }
+  }
+
+  function recordResult(ms) {
+    history.unshift(ms);
+    if (history.length > 20) history.pop();
+    renderHistory();
+  }
+
+  function getBadge(ms, best) {
+    if (ms === best && history.length > 1) return ['best', '★ BEST'];
+    if (ms < 250) return ['ok', 'fast'];
+    if (ms > 400) return ['slow', 'slow'];
+    return ['ok', 'good'];
+  }
+
+  function renderHistory() {
+    const list = document.getElementById('history-list');
+    if (!history.length) { list.innerHTML = '<div class="empty-history">No attempts yet — go!</div>'; return; }
+    const avg = Math.round(history.reduce((a,b)=>a+b,0)/history.length);
+    const best = Math.min(...history);
+    const worst = Math.max(...history);
+    document.getElementById('stat-avg').textContent = avg + 'ms';
+    document.getElementById('stat-best').textContent = best + 'ms';
+    document.getElementById('stat-count').textContent = history.length;
+    list.innerHTML = history.map((ms, i) => {
+      const pct = Math.round(((ms - 100) / (worst - 100 || 1)) * 100);
+      const barColor = ms <= best ? 'var(--wait)' : ms < 250 ? 'var(--go)' : ms > 400 ? 'var(--accent)' : 'var(--go)';
+      const [badgeCls, badgeTxt] = getBadge(ms, best);
+      return `<div class="history-item">
+        <span class="h-num">#${i+1}</span>
+        <div class="h-bar-wrap"><div class="h-bar" style="width:${Math.max(4,pct)}%;background:${barColor}"></div></div>
+        <span class="h-ms">${ms}ms</span>
+        <span class="h-badge ${badgeCls}">${badgeTxt}</span>
+      </div>`;
+    }).join('');
+  }
+
+  function clearHistory() {
+    history = [];
+    renderHistory();
+    document.getElementById('stat-avg').textContent = '—';
+    document.getElementById('stat-best').textContent = '—';
+    document.getElementById('stat-count').textContent = '0';
+    setArena('idle', 'Click to begin', false);
+  }
+</script>
+</body>
+</html>

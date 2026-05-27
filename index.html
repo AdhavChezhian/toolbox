@@ -5,158 +5,391 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>The Toolbox</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Syne+Mono&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --ink: #1a1a18;
-      --paper: #f5f3ee;
-      --muted: #9a9890;
-      --accent: #2d6a4f;
-      --accent-light: #e8f4ee;
-      --border: #dedad2;
+      --bg: #0f0f0d;
+      --surface: #1a1a17;
+      --surface2: #232320;
+      --border: #2e2e2a;
+      --text: #f0ede6;
+      --muted: #6b6b64;
+      --accent: #e8c547;
+      --accent2: #4ade80;
+      --accent3: #f87171;
+      --accent4: #60a5fa;
+      --accent5: #c084fc;
+      --accent6: #fb923c;
     }
 
-    html, body {
-      height: 100%;
-      background: var(--paper);
-      color: var(--ink);
-      font-family: 'DM Sans', sans-serif;
-      font-weight: 300;
-    }
+    html { scroll-behavior: smooth; }
 
     body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 300;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── Grid texture overlay ── */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image:
+        linear-gradient(var(--border) 1px, transparent 1px),
+        linear-gradient(90deg, var(--border) 1px, transparent 1px);
+      background-size: 48px 48px;
+      opacity: 0.3;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .wrap {
+      position: relative; z-index: 1;
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 3rem 2rem 5rem;
+    }
+
+    /* ── Header ── */
+    header {
       display: flex;
       flex-direction: column;
+      align-items: flex-start;
+      margin-bottom: 4rem;
+      padding-bottom: 2.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .logo-row {
+      display: flex;
       align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      padding: 2rem;
+      gap: 1.25rem;
+      margin-bottom: 1rem;
     }
 
-    header { text-align: center; margin-bottom: 4rem; }
+    .toolbox-icon {
+      width: 52px; height: 52px;
+      background: var(--accent);
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
 
-    .site-name {
-      font-family: 'Instrument Serif', serif;
-      font-size: clamp(2.8rem, 6vw, 5rem);
+    .toolbox-icon svg {
+      width: 28px; height: 28px;
+    }
+
+    h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(2.4rem, 5vw, 4rem);
+      font-weight: 800;
       line-height: 1;
-      letter-spacing: -0.02em;
+      letter-spacing: -0.03em;
+      color: var(--text);
     }
 
-    .site-name em { font-style: italic; color: var(--accent); }
+    h1 span { color: var(--accent); }
 
     .tagline {
-      margin-top: 0.75rem;
       font-size: 1rem;
       color: var(--muted);
       font-weight: 300;
-      letter-spacing: 0.01em;
+      letter-spacing: 0.02em;
+      max-width: 420px;
+      line-height: 1.6;
+    }
+
+    .tag-row {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 1.25rem;
+      flex-wrap: wrap;
+    }
+
+    .tag {
+      font-family: 'Syne Mono', monospace;
+      font-size: 0.7rem;
+      padding: 0.2rem 0.6rem;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      letter-spacing: 0.04em;
+    }
+
+    /* ── Tool grid ── */
+    .section-label {
+      font-family: 'Syne Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 1.25rem;
     }
 
     .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
       gap: 1px;
       background: var(--border);
       border: 1px solid var(--border);
       border-radius: 16px;
       overflow: hidden;
-      max-width: 860px;
-      width: 100%;
     }
 
     .card {
-      background: var(--paper);
-      padding: 2rem 2rem 1.75rem;
+      background: var(--surface);
+      padding: 1.75rem;
       text-decoration: none;
       color: inherit;
       display: flex;
       flex-direction: column;
-      gap: 0.5rem;
-      transition: background 0.15s ease;
+      gap: 0.6rem;
       position: relative;
       overflow: hidden;
+      transition: background 0.15s;
     }
 
-    .card:hover { background: #fff; }
-    .card:hover .card-arrow { opacity: 1; transform: translate(0, 0); }
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: var(--card-accent, var(--accent));
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.2s ease;
+    }
 
-    .card-emoji { font-size: 2rem; line-height: 1; margin-bottom: 0.25rem; display: block; }
+    .card:hover { background: var(--surface2); }
+    .card:hover::before { transform: scaleX(1); }
+    .card:hover .arrow { opacity: 1; transform: translate(0,0); }
+
+    .card-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+    }
+
+    .card-icon {
+      width: 40px; height: 40px;
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.3rem;
+      background: var(--card-icon-bg, rgba(232,197,71,0.12));
+      flex-shrink: 0;
+    }
+
+    .arrow {
+      font-size: 1rem;
+      color: var(--muted);
+      opacity: 0;
+      transform: translate(-4px, 4px);
+      transition: all 0.15s;
+    }
 
     .card-title {
-      font-family: 'Instrument Serif', serif;
-      font-size: 1.4rem;
-      line-height: 1.2;
-      color: var(--ink);
+      font-family: 'Syne', sans-serif;
+      font-size: 1.15rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      color: var(--text);
     }
 
-    .card-desc { font-size: 0.875rem; color: var(--muted); line-height: 1.5; font-weight: 300; }
+    .card-desc {
+      font-size: 0.85rem;
+      color: var(--muted);
+      line-height: 1.55;
+    }
 
-    .card-tag {
-      display: inline-block;
-      margin-top: 0.5rem;
-      font-size: 0.7rem;
-      font-weight: 500;
-      letter-spacing: 0.08em;
+    .card-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      margin-top: 0.25rem;
+      font-family: 'Syne Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.06em;
       text-transform: uppercase;
-      color: var(--accent);
-      background: var(--accent-light);
-      padding: 0.2rem 0.6rem;
-      border-radius: 999px;
+      color: var(--card-accent, var(--accent));
       width: fit-content;
     }
 
-    .card-arrow {
-      position: absolute;
-      top: 1.5rem; right: 1.5rem;
-      font-size: 1.1rem;
-      opacity: 0;
-      transform: translate(-4px, 4px);
-      transition: all 0.15s ease;
-      color: var(--accent);
+    .card-pill::before {
+      content: '';
+      width: 5px; height: 5px;
+      border-radius: 50%;
+      background: currentColor;
+      flex-shrink: 0;
     }
 
-    .card.coming-soon { opacity: 0.5; pointer-events: none; }
+    .card.coming {
+      opacity: 0.38;
+      pointer-events: none;
+    }
 
-    footer { margin-top: 3rem; font-size: 0.8rem; color: var(--muted); text-align: center; }
-    footer a { color: var(--muted); text-decoration: underline; text-underline-offset: 3px; }
+    /* ── Footer ── */
+    footer {
+      margin-top: 4rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .footer-brand {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+
+    .footer-brand span { color: var(--accent); }
+
+    footer a {
+      font-family: 'Syne Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--muted);
+      text-decoration: none;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1px;
+      transition: color 0.1s, border-color 0.1s;
+    }
+
+    footer a:hover { color: var(--text); border-color: var(--text); }
+
+    /* Stagger fade-in */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .card { animation: fadeUp 0.4s ease both; }
+    .card:nth-child(1) { animation-delay: 0.05s; }
+    .card:nth-child(2) { animation-delay: 0.10s; }
+    .card:nth-child(3) { animation-delay: 0.15s; }
+    .card:nth-child(4) { animation-delay: 0.20s; }
+    .card:nth-child(5) { animation-delay: 0.25s; }
+    .card:nth-child(6) { animation-delay: 0.30s; }
+    .card:nth-child(7) { animation-delay: 0.35s; }
+    .card:nth-child(8) { animation-delay: 0.40s; }
   </style>
 </head>
 <body>
+<div class="wrap">
 
   <header>
-    <h1 class="site-name">The <em>Toolbox</em></h1>
-    <p class="tagline">mini tools, actually useful</p>
+    <div class="logo-row">
+      <div class="toolbox-icon">
+        <!-- Toolbox SVG -->
+        <svg viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="2" y="11" width="24" height="15" rx="3" fill="#0f0f0d"/>
+          <path d="M9 11V8a5 5 0 0110 0v3" stroke="#0f0f0d" stroke-width="2.2" stroke-linecap="round"/>
+          <rect x="2" y="11" width="24" height="15" rx="3" stroke="#0f0f0d" stroke-width="0"/>
+          <rect x="2" y="11" width="24" height="15" rx="3" fill="#0f0f0d" opacity="0"/>
+          <!-- Box body -->
+          <rect x="3" y="12" width="22" height="13" rx="2.5" fill="#1a1a00" stroke="#0f0f0d" stroke-width="0"/>
+          <!-- Simplified icon: wrench -->
+          <path d="M10 20l5-5" stroke="#e8c547" stroke-width="2" stroke-linecap="round"/>
+          <circle cx="16" cy="14" r="2.5" stroke="#e8c547" stroke-width="1.8" fill="none"/>
+          <path d="M10 20l-1.5 1.5" stroke="#e8c547" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <h1>The <span>Toolbox</span></h1>
+    </div>
+    <p class="tagline">A growing collection of small, useful tools. No accounts, no tracking — just open and use.</p>
+    <div class="tag-row">
+      <span class="tag">free forever</span>
+      <span class="tag">no login</span>
+      <span class="tag">open source</span>
+      <span class="tag">no ads</span>
+    </div>
   </header>
 
+  <p class="section-label">// tools — {{ count }} available</p>
+
   <div class="grid">
-    <a class="card" href="morse.html">
-      <span class="card-emoji">📡</span>
-      <span class="card-title">Morse Code</span>
-      <p class="card-desc">Translate text to morse, hear it play, and train yourself to read it.</p>
-      <span class="card-tag">Interactive</span>
-      <span class="card-arrow">↗</span>
+
+    <a class="card" href="morse.html" style="--card-accent:var(--accent2); --card-icon-bg:rgba(74,222,128,0.1)">
+      <div class="card-top">
+        <div class="card-icon">📡</div>
+        <span class="arrow">↗</span>
+      </div>
+      <div class="card-title">Morse Code</div>
+      <p class="card-desc">Translate any text to morse, hear it played back, and watch it light up symbol by symbol.</p>
+      <span class="card-pill">Interactive</span>
     </a>
 
-    <div class="card coming-soon">
-      <span class="card-emoji">🌍</span>
-      <span class="card-title">Right Now</span>
-      <p class="card-desc">See what's happening every second across the world.</p>
-      <span class="card-tag">Coming soon</span>
-    </div>
+    <a class="card" href="text.html" style="--card-accent:var(--accent4); --card-icon-bg:rgba(96,165,250,0.1)">
+      <div class="card-top">
+        <div class="card-icon">🔡</div>
+        <span class="arrow">↗</span>
+      </div>
+      <div class="card-title">Text Transformer</div>
+      <p class="card-desc">Reverse, scramble, convert to Pig Latin, NATO alphabet, binary, and more — instantly.</p>
+      <span class="card-pill">Utility</span>
+    </a>
 
-    <div class="card coming-soon">
-      <span class="card-emoji">🗓</span>
-      <span class="card-title">Life in Weeks</span>
-      <p class="card-desc">Your entire life, visualized as a grid of weeks.</p>
-      <span class="card-tag">Coming soon</span>
-    </div>
+    <a class="card" href="reaction.html" style="--card-accent:var(--accent3); --card-icon-bg:rgba(248,113,113,0.1)">
+      <div class="card-top">
+        <div class="card-icon">⚡</div>
+        <span class="arrow">↗</span>
+      </div>
+      <div class="card-title">Reaction Time</div>
+      <p class="card-desc">How fast are your reflexes? Click the moment you see the signal and track your scores.</p>
+      <span class="card-pill">Game</span>
+    </a>
+
+    <a class="card" href="colors.html" style="--card-accent:var(--accent5); --card-icon-bg:rgba(192,132,252,0.1)">
+      <div class="card-top">
+        <div class="card-icon">🎨</div>
+        <span class="arrow">↗</span>
+      </div>
+      <div class="card-title">Color Palette</div>
+      <p class="card-desc">Describe a mood or vibe and get an AI-generated palette with hex codes and gradient embeds.</p>
+      <span class="card-pill">Creative · AI</span>
+    </a>
+
+    <a class="card" href="units.html" style="--card-accent:var(--accent); --card-icon-bg:rgba(232,197,71,0.1)">
+      <div class="card-top">
+        <div class="card-icon">📐</div>
+        <span class="arrow">↗</span>
+      </div>
+      <div class="card-title">Unit Converter</div>
+      <p class="card-desc">Convert any unit with a live dimensional analysis display — watch the units cancel in real time.</p>
+      <span class="card-pill">Utility</span>
+    </a>
+
+    <a class="card" href="metronome.html" style="--card-accent:var(--accent6); --card-icon-bg:rgba(251,146,60,0.1)">
+      <div class="card-top">
+        <div class="card-icon">🎵</div>
+        <span class="arrow">↗</span>
+      </div>
+      <div class="card-title">Metronome</div>
+      <p class="card-desc">A full-featured metronome with BPM control, time signatures, and a visual beat indicator.</p>
+      <span class="card-pill">Music</span>
+    </a>
+
   </div>
 
   <footer>
-    <p>made for fun &nbsp;·&nbsp; <a href="https://github.com" target="_blank">github</a></p>
+    <span class="footer-brand">The <span>Toolbox</span></span>
+    <a href="https://github.com" target="_blank">view on github →</a>
   </footer>
 
+</div>
+
+<script>
+  // Update tool count
+  const count = document.querySelectorAll('.card:not(.coming)').length;
+  document.querySelector('.section-label').textContent = `// tools — ${count} available`;
+</script>
 </body>
 </html>
